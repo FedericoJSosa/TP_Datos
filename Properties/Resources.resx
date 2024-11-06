@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Presentacion" xml:space="preserve">
+    <value>En Cine de Luxe, presentamos un sistema innovador diseñado para optimizar la gestión de la venta de entradas por parte de nuestros empleados. Este sistema intuitivo permite la emisión de comprobantes, la gestión de butacas numeradas y la implementación de promociones, garantizando una experiencia fluida para los clientes. Con herramientas que facilitan el proceso de compra y reservas en línea, nuestro equipo podrá ofrecer un servicio excepcional, elevando así la calidad de nuestra oferta cinematográfica.</value>
+  </data>
+  <data name="ModoUno" xml:space="preserve">
+    <value>Este reporte presenta la cantidad total de boletos vendidos y la recaudación mensual por sucursal. Se incluirán únicamente las sucursales que superen un umbral mínimo de boletos vendidos. Los resultados están ordenados de mayor a menor recaudación, permitiendo identificar fácilmente las sucursales con mejor desempeño en ventas.</value>
+  </data>
+  <data name="cadenaConexion" xml:space="preserve">
+    <value>Data Source=DESKTOP-QMJF5KL;Initial Catalog=Cinema_TP;Integrated Security=True</value>
+  </data>
+  <data name="ModoDos" xml:space="preserve">
+    <value>Este reporte tiene como objetivo identificar el comestible menos vendido en un año especificado por el usuario por cada sucursal. Se pueden excluir productos en base a la primer letra del mismo. El informe mostrará nombre del comestible,  precio unitario, facturación total, cantidad total vendida, el promedio de cantidad vendida y la sucursal correspondiente. Los resultados estarán ordenados de manera descendente por sucursal, facilitando la evaluación del desempeño de cada uno.</value>
+  </data>
+  <data name="ModoTres" xml:space="preserve">
+    <value>Este reporte lista las sucursales que tienen un mínimo de unidades de comestibles en stock, especificado por el usuario. Muestra la sucursal y el total de comestibles, incluyendo solo aquellas sucursales cuyo promedio de ventas de comestibles supera el promedio de todas las sucursales.</value>
+  </data>
+  <data name="ModoCuatro" xml:space="preserve">
+    <value>Este reporte muestra todas las funciones proyectadas en un tipo de sala específico durante el mes indicado por el usuario. Se incluye el total de boletos vendidos y el precio promedio por boleto para cada función. Además, se filtran las funciones que tuvieron un precio promedio superior al precio promedio anual de todas las funciones en salas de ese mismo tipo, permitiendo identificar aquellas con mayor rentabilidad relativa.</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="imagenCine" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\view-3d-cinema-theatre-room.jpg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="iconoCine" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\count_theapplication_themovie_3042.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="iconoID" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\4105938-account-card-id-identification-identity-card-profile-user-profile_113929.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ModoCinco" xml:space="preserve">
+    <value>Reporte que muestra el total de boletos reservados por cada cliente y función, junto con la recaudación estimada de dichas reservas. Solo se incluiran clientes que hayan reservado más de una cantidad especificada de boletos. Los resultados seran ordenados en función de la recaudación estimada, de mayor a menor.</value>
+  </data>
+  <data name="ModoSeis" xml:space="preserve">
+    <value>Reporte que lista las películas que no han sido proyectadas en ninguna función durante el año solicitado, incluyendo su género y fecha de estreno. Esta lista debe excluir aquellas películas que ya cuentan con funciones programadas.</value>
+  </data>
+  <data name="ModoSiete" xml:space="preserve">
+    <value>
+Reporte que muestra el total recaudado por funciones y ventas de comestibles para cada sucursal durante el periodo especificado. El reporte incluye todas las sucursales y una columna que indica el tipo de venta, ya sea "Funciones" o "Comestibles".</value>
+  </data>
+  <data name="ModoOcho" xml:space="preserve">
+    <value>Reporte que muestra una lista de clientes que han comprado boletos para funciones de películas en un período de tiempo determinado. La consulta muestra las ventas, mostrando el nombre de cada cliente y la cantidad total de boletos adquiridos.</value>
+  </data>
+</root>
