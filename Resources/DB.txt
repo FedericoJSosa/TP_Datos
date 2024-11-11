@@ -1,0 +1,831 @@
+﻿CREATE DATABASE CINE_TP
+GO
+USE CINE_TP
+GO
+/****** Object:  UserDefinedFunction [dbo].[Total_Boletos_Reservas]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[Total_Boletos_Reservas] (
+@IdCliente INT,
+@FechaDesde DATETIME,
+@FechaHasta DATETIME
+)
+RETURNS INT
+AS
+BEGIN
+    RETURN (
+        SELECT SUM(r.cantidad_boletos)
+        FROM Reservas r
+        WHERE r.id_cliente = @IdCliente
+          AND r.fecha_reserva BETWEEN @FechaDesde AND @FechaHasta
+		  )
+END
+
+GO
+/****** Object:  UserDefinedFunction [dbo].[Total_Boletos_Ventas]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[Total_Boletos_Ventas] (
+    @IdCliente INT,
+    @FechaDesde DATETIME,
+    @FechaHasta DATETIME
+)
+RETURNS INT
+AS
+BEGIN
+    RETURN (
+        SELECT SUM(dv.cantidad)
+        FROM Ventas v
+        JOIN D_Ventas dv ON v.id_venta = dv.id_venta
+        WHERE v.id_cliente = @IdCliente
+          AND v.fecha_venta BETWEEN @FechaDesde AND @FechaHasta
+    )
+END
+
+GO
+/****** Object:  UserDefinedFunction [dbo].[Total_Recaudado_Comestibles]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[Total_Recaudado_Comestibles] (@IdSucursal INT,
+@FechaDesde dateTIME,
+@FechaHasta dateTIME
+)
+RETURNS DECIMAL(10, 2)
+AS
+BEGIN
+    RETURN (
+        SELECT SUM(dv.cantidad * c.precio_unit)
+        FROM Ventas AS v
+        left JOIN D_Ventas AS dv ON v.id_venta = dv.id_venta
+        left JOIN Comestibles AS c ON dv.id_comestible = c.id_comestible
+        WHERE v.id_sucursal = @IdSucursal 
+          AND v.fecha_venta BETWEEN @FechaDesde and @FechaHasta
+)
+END
+GO
+/****** Object:  UserDefinedFunction [dbo].[Total_Recaudado_Funciones]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[Total_Recaudado_Funciones] (@IdSucursal INT,
+@FechaDesde dateTIME,
+@FechaHasta dateTIME
+)
+RETURNS DECIMAL(10, 2)
+AS
+BEGIN
+    RETURN (
+        SELECT SUM(f.precio_unit * r.cantidad_boletos)
+        FROM Salas AS sa
+        left JOIN Funciones AS f ON sa.id_sala = f.id_sala
+        left JOIN Reservas AS r ON f.id_funcion = r.id_funcion
+        WHERE sa.id_sucursal = @IdSucursal 
+          AND f.fecha BETWEEN @FechaDesde and @FechaHasta
+)
+END
+GO
+/****** Object:  Table [dbo].[Sucursales]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Sucursales](
+	[id_sucursal] [int] NOT NULL,
+	[sucursal] [nvarchar](100) NOT NULL,
+	[direccion] [nvarchar](200) NULL,
+	[id_barrio_suc] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_sucursal] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Comestibles]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Comestibles](
+	[id_comestible] [int] NOT NULL,
+	[comestible] [nvarchar](100) NOT NULL,
+	[precio_unit] [decimal](10, 2) NULL,
+	[descripcion] [nvarchar](200) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_comestible] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Ventas]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Ventas](
+	[id_venta] [int] NOT NULL,
+	[id_sucursal] [int] NULL,
+	[id_cliente] [int] NULL,
+	[fecha_venta] [datetime] NULL,
+	[metodo_pago] [nvarchar](100) NULL,
+	[impuestos] [decimal](10, 2) NULL,
+	[descuentos] [decimal](10, 2) NULL,
+	[estado_trans] [nvarchar](100) NULL,
+	[tipo_venta] [nvarchar](100) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_venta] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[D_Ventas]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[D_Ventas](
+	[id_d_ventas] [int] NOT NULL,
+	[id_funcion] [int] NULL,
+	[id_comestible] [int] NULL,
+	[id_venta] [int] NULL,
+	[cantidad] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_d_ventas] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[Vent_Com_Año_Actu]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE view [dbo].[Vent_Com_Año_Actu]
+as
+select C.comestible,
+C.precio_unit ,
+sum(C.precio_unit*DV.cantidad) "Facturacion",
+sum(DV.cantidad) "Cantidad vendida", S.sucursal, V.fecha_venta
+from D_Ventas as DV
+join Comestibles as C on DV.id_comestible=C.id_comestible
+join Ventas as V on DV.id_venta=V.id_venta
+join Sucursales as S on V.id_sucursal=S.id_sucursal
+group by C.comestible, C.precio_unit, S.sucursal, fecha_venta
+GO
+/****** Object:  Table [dbo].[Barrios]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Barrios](
+	[id_barrio] [int] NOT NULL,
+	[barrio] [nvarchar](100) NOT NULL,
+	[id_provincia] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_barrio] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Cargos]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Cargos](
+	[id_cargo] [int] NOT NULL,
+	[cargo] [nvarchar](100) NOT NULL,
+	[sueldo_basic] [decimal](10, 2) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_cargo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Clientes]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Clientes](
+	[id_cliente] [int] NOT NULL,
+	[nombre] [nvarchar](100) NOT NULL,
+	[direccion] [nvarchar](200) NULL,
+	[id_barrio] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_cliente] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Contactos]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Contactos](
+	[id_contacto] [int] NOT NULL,
+	[contacto] [nvarchar](100) NOT NULL,
+	[id_sucursal] [int] NULL,
+	[id_empleado] [int] NULL,
+	[id_cliente] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_contacto] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Empleados]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Empleados](
+	[id_empleado] [int] NOT NULL,
+	[nombre] [nvarchar](100) NOT NULL,
+	[direccion] [nvarchar](200) NULL,
+	[id_cargo] [int] NULL,
+	[id_barrio] [int] NULL,
+	[id_sucursal] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_empleado] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Funciones]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Funciones](
+	[id_funcion] [int] NOT NULL,
+	[id_pelicula] [int] NULL,
+	[id_sala] [int] NULL,
+	[fecha] [date] NULL,
+	[idioma] [nvarchar](50) NULL,
+	[subtitulado] [bit] NULL,
+	[precio_unit] [decimal](10, 2) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_funcion] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Generos]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Generos](
+	[id_genero] [int] NOT NULL,
+	[genero] [nvarchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_genero] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Paises]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Paises](
+	[id_pais] [int] NOT NULL,
+	[pais] [nvarchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_pais] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Peliculas]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Peliculas](
+	[id_pelicula] [int] NOT NULL,
+	[pelicula] [nvarchar](200) NOT NULL,
+	[fecha_estreno] [date] NULL,
+	[id_pais_produccion] [int] NULL,
+	[clasificacion] [nvarchar](50) NULL,
+	[idioma] [nvarchar](50) NULL,
+	[duracion] [int] NULL,
+	[director] [nvarchar](100) NULL,
+	[produccion] [nvarchar](100) NULL,
+	[guion] [nvarchar](100) NULL,
+	[musica] [nvarchar](100) NULL,
+	[fotografia] [nvarchar](100) NULL,
+	[montaje] [nvarchar](100) NULL,
+	[vestuario] [nvarchar](100) NULL,
+	[protagonista] [nvarchar](100) NULL,
+	[compania_productora] [nvarchar](100) NULL,
+	[distribucion] [nvarchar](100) NULL,
+	[presupuesto] [decimal](15, 2) NULL,
+	[recaudacion] [decimal](15, 2) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_pelicula] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Peliculas_Generos]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Peliculas_Generos](
+	[id_pelicula] [int] NOT NULL,
+	[id_genero] [int] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_pelicula] ASC,
+	[id_genero] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Provincias]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Provincias](
+	[id_provincia] [int] NOT NULL,
+	[provincia] [nvarchar](100) NOT NULL,
+	[id_pais] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_provincia] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Reservas]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Reservas](
+	[id_reserva] [int] NOT NULL,
+	[id_cliente] [int] NULL,
+	[id_funcion] [int] NULL,
+	[cantidad_boletos] [int] NULL,
+	[fecha_reserva] [date] NULL,
+	[hubutaca] [int] NOT NULL,
+	[estado_reserva] [nvarchar](100) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_reserva] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Salas]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Salas](
+	[id_sala] [int] NOT NULL,
+	[numero_sala] [int] NOT NULL,
+	[capacidad] [int] NULL,
+	[tipo_sala] [nvarchar](100) NULL,
+	[id_sucursal] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_sala] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Stocks]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Stocks](
+	[id_stock] [int] NOT NULL,
+	[id_sucursal] [int] NULL,
+	[id_comestible] [int] NULL,
+	[cantidad] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_stock] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Tipos_Contactos]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Tipos_Contactos](
+	[id_tipo_contacto] [int] NOT NULL,
+	[tipo_contacto] [nvarchar](100) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id_tipo_contacto] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Barrios]  WITH CHECK ADD FOREIGN KEY([id_provincia])
+REFERENCES [dbo].[Provincias] ([id_provincia])
+GO
+ALTER TABLE [dbo].[Clientes]  WITH CHECK ADD FOREIGN KEY([id_barrio])
+REFERENCES [dbo].[Barrios] ([id_barrio])
+GO
+ALTER TABLE [dbo].[Contactos]  WITH CHECK ADD FOREIGN KEY([id_cliente])
+REFERENCES [dbo].[Clientes] ([id_cliente])
+GO
+ALTER TABLE [dbo].[Contactos]  WITH CHECK ADD FOREIGN KEY([id_empleado])
+REFERENCES [dbo].[Empleados] ([id_empleado])
+GO
+ALTER TABLE [dbo].[Contactos]  WITH CHECK ADD FOREIGN KEY([id_sucursal])
+REFERENCES [dbo].[Sucursales] ([id_sucursal])
+GO
+ALTER TABLE [dbo].[D_Ventas]  WITH CHECK ADD FOREIGN KEY([id_comestible])
+REFERENCES [dbo].[Comestibles] ([id_comestible])
+GO
+ALTER TABLE [dbo].[D_Ventas]  WITH CHECK ADD FOREIGN KEY([id_funcion])
+REFERENCES [dbo].[Funciones] ([id_funcion])
+GO
+ALTER TABLE [dbo].[D_Ventas]  WITH CHECK ADD FOREIGN KEY([id_venta])
+REFERENCES [dbo].[Ventas] ([id_venta])
+GO
+ALTER TABLE [dbo].[Empleados]  WITH CHECK ADD FOREIGN KEY([id_barrio])
+REFERENCES [dbo].[Barrios] ([id_barrio])
+GO
+ALTER TABLE [dbo].[Empleados]  WITH CHECK ADD FOREIGN KEY([id_cargo])
+REFERENCES [dbo].[Cargos] ([id_cargo])
+GO
+ALTER TABLE [dbo].[Empleados]  WITH CHECK ADD FOREIGN KEY([id_sucursal])
+REFERENCES [dbo].[Sucursales] ([id_sucursal])
+GO
+ALTER TABLE [dbo].[Funciones]  WITH CHECK ADD FOREIGN KEY([id_pelicula])
+REFERENCES [dbo].[Peliculas] ([id_pelicula])
+GO
+ALTER TABLE [dbo].[Funciones]  WITH CHECK ADD FOREIGN KEY([id_sala])
+REFERENCES [dbo].[Salas] ([id_sala])
+GO
+ALTER TABLE [dbo].[Peliculas]  WITH CHECK ADD FOREIGN KEY([id_pais_produccion])
+REFERENCES [dbo].[Paises] ([id_pais])
+GO
+ALTER TABLE [dbo].[Peliculas_Generos]  WITH CHECK ADD FOREIGN KEY([id_genero])
+REFERENCES [dbo].[Generos] ([id_genero])
+GO
+ALTER TABLE [dbo].[Peliculas_Generos]  WITH CHECK ADD FOREIGN KEY([id_pelicula])
+REFERENCES [dbo].[Peliculas] ([id_pelicula])
+GO
+ALTER TABLE [dbo].[Provincias]  WITH CHECK ADD FOREIGN KEY([id_pais])
+REFERENCES [dbo].[Paises] ([id_pais])
+GO
+ALTER TABLE [dbo].[Reservas]  WITH CHECK ADD FOREIGN KEY([id_cliente])
+REFERENCES [dbo].[Clientes] ([id_cliente])
+GO
+ALTER TABLE [dbo].[Reservas]  WITH CHECK ADD FOREIGN KEY([id_funcion])
+REFERENCES [dbo].[Funciones] ([id_funcion])
+GO
+ALTER TABLE [dbo].[Salas]  WITH CHECK ADD FOREIGN KEY([id_sucursal])
+REFERENCES [dbo].[Sucursales] ([id_sucursal])
+GO
+ALTER TABLE [dbo].[Stocks]  WITH CHECK ADD FOREIGN KEY([id_comestible])
+REFERENCES [dbo].[Comestibles] ([id_comestible])
+GO
+ALTER TABLE [dbo].[Stocks]  WITH CHECK ADD FOREIGN KEY([id_sucursal])
+REFERENCES [dbo].[Sucursales] ([id_sucursal])
+GO
+ALTER TABLE [dbo].[Sucursales]  WITH CHECK ADD FOREIGN KEY([id_barrio_suc])
+REFERENCES [dbo].[Barrios] ([id_barrio])
+GO
+ALTER TABLE [dbo].[Ventas]  WITH CHECK ADD FOREIGN KEY([id_cliente])
+REFERENCES [dbo].[Clientes] ([id_cliente])
+GO
+ALTER TABLE [dbo].[Ventas]  WITH CHECK ADD FOREIGN KEY([id_sucursal])
+REFERENCES [dbo].[Sucursales] ([id_sucursal])
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ClientesConMasBoletos]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_ClientesConMasBoletos]
+@cantidad int = null
+AS
+BEGIN
+    if @cantidad is not null and @cantidad>0
+		BEGIN
+		SELECT c.id_cliente, 
+			   c.nombre, 
+			   r.id_funcion, 
+			   SUM(r.cantidad_boletos) AS total_boletos, 
+			   SUM(r.cantidad_boletos * f.precio_unit) AS recaudacion_estimadas
+		FROM Reservas r
+		JOIN Clientes c ON r.id_cliente = c.id_cliente
+		JOIN Funciones f ON r.id_funcion = f.id_funcion
+		GROUP BY c.id_cliente, c.nombre, r.id_funcion
+		HAVING SUM(r.cantidad_boletos) >= @cantidad
+		ORDER BY recaudacion_estimadas DESC;
+		END
+	ELSE
+		BEGIN
+			RAISERROR('La cantidad minima no es valida', 16, 1)
+		END
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[SP_ComestibleMenosVendido]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[SP_ComestibleMenosVendido]
+@ano int,
+@letra varchar(1)
+as
+begin
+	if @ano is not null and @letra is not null
+		begin
+			select V.comestible "Producto",V.precio_unit "Precio unitario",
+			V.Facturacion,V.[Cantidad vendida],V.sucursal "Sucursal",	
+							(
+							select avg([Cantidad vendida]) 
+							from Vent_Com_Año_Actu as V1 
+							where V1.sucursal=V.sucursal
+							) "Promedio de cantidad vendida"
+			from Vent_Com_Año_Actu as V
+			where V.comestible not like @letra+'%'
+			and				(
+							[Cantidad vendida]=(
+							select min([Cantidad vendida])
+							from Vent_Com_Año_Actu as V3
+							where V3.sucursal=V.sucursal)
+							)
+			and year(V.fecha_venta)=@ano
+			order by V.sucursal desc
+		end
+	else
+		begin
+			raiserror('Los parametros son invalidos o incorrectos',16,1)
+		end
+end
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Consultar_Recaudacion_Ultimos3Meses]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_Consultar_Recaudacion_Ultimos3Meses]
+@FechaDesde dateTIME,
+@FechaHasta dateTIME
+AS
+BEGIN
+    SELECT 
+        s.sucursal,
+        dbo.Total_Recaudado_Funciones(s.id_sucursal,@FechaDesde,@FechaHasta) AS total_recaudado,
+        'Funciones' AS tipo_venta
+    FROM Sucursales AS s
+    WHERE dbo.Total_Recaudado_Funciones(s.id_sucursal,@FechaDesde, @FechaHasta) IS NOT NULL
+
+    UNION 
+
+    SELECT 
+        s.sucursal,
+        dbo.Total_Recaudado_Comestibles(s.id_sucursal, @FechaDesde, @FechaHasta) AS total_recaudado,
+        'Comestibles' AS tipo_venta
+    FROM Sucursales AS s
+    WHERE dbo.Total_Recaudado_Comestibles(s.id_sucursal, @FechaDesde, @FechaHasta) IS NOT NULL
+    ORDER BY s.sucursal
+END
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Consultar_Total_BoletosClientes]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[SP_Consultar_Total_BoletosClientes]
+    @FechaDesde DATETIME,
+    @FechaHasta DATETIME
+AS
+BEGIN
+    SELECT 
+    c.nombre,
+		dbo.Total_Boletos_Reservas(c.id_cliente, @FechaDesde, @FechaHasta) 
+		+ dbo.Total_Boletos_Ventas(c.id_cliente, @FechaDesde, @FechaHasta) AS Total_Boletos
+FROM 
+    Clientes c
+ORDER BY 
+    total_boletos DESC
+END
+GO
+/****** Object:  StoredProcedure [dbo].[SP_FuncionesImax]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[SP_FuncionesImax]
+@mes varchar(20),
+@tipoSala varchar (10)
+as
+begin
+
+
+
+
+
+
+---
+	if @mes is not null and @tipoSala is not null
+		begin
+		declare @mesConvertido int
+		set @mesConvertido=case @mes
+							when 'Enero' then 1
+							when 'Febrero' then 2
+							when 'Marzo' then 3
+							when 'Abril' then 4
+							when 'Mayo' then 5
+							when 'Junio' then 6
+							when 'Julio' then 7
+							when 'Agosto' then 8 
+							when 'Septiembre' then 9
+							when 'Octubre' then 10
+							when 'Noviembre' then 11
+							when 'Diciembre' then 12
+							end
+			create table #FuncionesImaxMesPasado
+			(id_funcion int,
+			id_pelicula int,
+			fecha datetime,
+			boletos int,
+			precio_prom decimal)
+			---
+			insert into
+			#FuncionesImaxMesPasado(id_funcion,id_pelicula,fecha,boletos,precio_prom)
+			select F.id_funcion, F.id_pelicula, F.fecha,
+			sum(R.cantidad_boletos) as "Total Vendidos", 
+			avg(F.precio_unit) as "Precio Promedio"
+			from Funciones as F
+			join Salas as S on F.id_sala=S.id_sala
+			join Reservas as R on F.id_funcion=R.id_funcion
+			where S.tipo_sala=@tipoSala
+			and month(F.fecha)=@mesConvertido --ahora solo hay datos para octubre y julio 
+			group by F.id_funcion, F.id_pelicula, F.fecha
+			---
+			select id_funcion, id_pelicula, fecha, boletos, precio_prom 
+			from #FuncionesImaxMesPasado
+			where precio_prom   > (
+							select avg(F.precio_unit)
+							from Funciones as F
+							join Salas S on F.id_sala=S.id_sala
+							where S.tipo_sala=@tipoSala
+							and year(F.fecha)=year(getdate())
+							  )
+		end
+	else
+		begin
+			raiserror('Los campos son invalidos o incorrectos',16,1)
+		end
+end
+GO
+/****** Object:  StoredProcedure [dbo].[SP_Listar]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create procedure [dbo].[SP_Listar]
+@cantidadMinima int = null
+as
+begin
+select s.id_sucursal ,sucursal as 'Sucursales', cantidad 'Stock'
+from Sucursales as S
+join Stocks as ST on S.id_sucursal=ST.id_sucursal
+group by s.id_sucursal,sucursal, cantidad 
+having cantidad>=@cantidadMinima
+and (
+select avg(C.precio_unit*DV.cantidad)
+from Comestibles as C 
+join D_Ventas as DV on C.id_comestible=DV.id_comestible
+join Ventas as V on DV.id_venta=V.id_venta
+where V.id_sucursal=S.id_sucursal
+)>(select avg(C1.precio_unit*DV1.cantidad)
+from Comestibles as C1 
+join D_Ventas as DV1 on C1.id_comestible=DV1.id_comestible)
+end
+GO
+/****** Object:  StoredProcedure [dbo].[SP_ListarSucursalesConStock]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[SP_ListarSucursalesConStock]
+@cantidadMinima int = null
+as
+begin
+	if @cantidadMinima is not null and @cantidadMinima>=0
+		begin
+			select s.id_sucursal ,sucursal as 'Sucursales', cantidad 'Stock'
+			from Sucursales as S
+			join Stocks as ST on S.id_sucursal=ST.id_sucursal
+			group by s.id_sucursal,sucursal, cantidad 
+			having cantidad>=@cantidadMinima
+			and (
+					select avg(C.precio_unit*DV.cantidad)
+					from Comestibles as C 
+					join D_Ventas as DV on C.id_comestible=DV.id_comestible
+					join Ventas as V on DV.id_venta=V.id_venta
+					where V.id_sucursal=S.id_sucursal
+					)>(
+					select avg(C1.precio_unit*DV1.cantidad)
+					from Comestibles as C1 
+					join D_Ventas as DV1 on C1.id_comestible=DV1.id_comestible
+					)
+		end
+	else
+		begin
+			raiserror('La cantidad minima no es valida', 16, 1)
+		end
+end
+GO
+/****** Object:  StoredProcedure [dbo].[sp_PeliculasSinFunciones]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[sp_PeliculasSinFunciones]
+@año int = null
+AS
+BEGIN
+	if @año is not null and @año>0
+		BEGIN
+		SELECT p.id_pelicula, 
+			   p.pelicula, 
+			   p.fecha_estreno, 
+			   g.genero
+		FROM Peliculas p
+		JOIN Peliculas_Generos pg ON p.id_pelicula = pg.id_pelicula
+		JOIN Generos g ON pg.id_genero = g.id_genero
+		WHERE p.id_pelicula NOT IN (
+			SELECT f.id_pelicula
+			FROM Funciones f
+			WHERE YEAR(f.fecha) = @año
+		)
+		AND p.id_pelicula NOT IN (
+			SELECT f.id_pelicula
+			FROM Funciones f
+			WHERE f.fecha > GETDATE());
+		END
+	ELSE
+		BEGIN
+			RAISERROR('El año minimo no es valido', 16, 1)
+		END
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_ResumenBoletosVendidos]    Script Date: 11/11/2024 18:21:47 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[sp_ResumenBoletosVendidos]
+    @Mes varchar(20) = NULL,
+	@boletosReq int=null
+AS
+BEGIN
+if @Mes is not null and @boletosReq>=0
+	begin
+	declare @mesConvertido int
+	set @mesConvertido=case @Mes
+						when 'Enero' then 1
+						when 'Febrero' then 2
+						when 'Marzo' then 3
+						when 'Abril' then 4
+						when 'Mayo' then 5
+						when 'Junio' then 6
+						when 'Julio' then 7
+						when 'Agosto' then 8 
+						when 'Septiembre' then 9
+						when 'Octubre' then 10
+						when 'Noviembre' then 11
+						when 'Diciembre' then 12
+						end
+		SELECT SU.sucursal AS Sucursal,
+			   MONTH(F.fecha) AS Mes,
+			   SUM(R.cantidad_boletos) AS Boletos,
+			   SUM(R.cantidad_boletos * F.precio_unit) AS Recaudado
+		FROM Reservas AS R
+		JOIN Funciones AS F ON R.id_funcion = F.id_funcion
+		JOIN Salas AS S ON F.id_sala = S.id_sala
+		JOIN Sucursales AS SU ON S.id_sucursal = SU.id_sucursal
+		GROUP BY SU.sucursal, MONTH(F.fecha)
+		HAVING SUM(R.cantidad_boletos) >= @boletosReq and MONTH(F.fecha)=@mesConvertido
+		ORDER BY Recaudado DESC;
+	end
+else
+	begin
+		raiserror('Los datos estan incompletos o son incorrectos.',16,1)
+	end
+END;
+GO
