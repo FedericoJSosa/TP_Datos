@@ -52,7 +52,7 @@ namespace TP_Datos
             textBox1.Visible = false;
             textBox2.Enabled = false;
             textBox2.Visible = false;
-            
+
             label2.Enabled = false;
             label2.Visible = false;
             label3.Enabled = false;
@@ -118,12 +118,12 @@ namespace TP_Datos
                 label1.Text = Resources.ModoCuatro;
                 label2.Enabled = true;
                 label2.Visible = true;
-                label3.Enabled = true;
-                label3.Visible = true;
+                label4.Enabled = true;
+                label4.Visible = true;
                 comboBox1.Enabled = true;
                 comboBox1.Visible = true;
-                textBox2.Visible = true;
-                textBox2.Enabled=true;
+                comboBox2.Enabled = true;
+                comboBox2.Visible = true;
                 label2.Text = "Mes:";
                 label4.Text = "Sala:";
                 comboBox1.SelectedIndex = 0;
@@ -494,6 +494,11 @@ namespace TP_Datos
                 var rowValues = row.ItemArray.Select(value => value == DBNull.Value ? "Ningun" : value).ToArray();
                 dataGridView1.Rows.Add(rowValues);
             }
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
